@@ -5,15 +5,17 @@
  * =========================================================
  * 
  */
-
+#include <VirtualWire.h>
 #include <SPI.h>
 #include <SD.h>
 
 #include "Configuration.h"
 // #include "ConfigurationProMicro.h" // Select this if you have a Sparkfun ProMicro board
 #include "Keyboard.h"
-#include "Mouse.h"
 
+uint8_t RFbuff[VW_MAX_MESSAGE_LEN];   //VirtualWire receiver buffer
+uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;//VirtualWire receiver length
+  
 const int KEYPAD_0 = 234;
 const int KEYPAD_1 = 225;
 const int KEYPAD_2 = 226;
@@ -103,19 +105,7 @@ void runLine() {
     else if (equalsBuffer(0, space, "STRING")) {
       for (int i = space + 1; i < bufSize; i++) KeyboardWrite(buf[i]);
     }
-    else if (equalsBuffer(0, space, "MOUSE")) {
-      int nSpace = getSpace(space + 1, bufSize);
-      int x = getInt(buf, space);
-      int y = getInt(buf, nSpace);
-      Mouse.move(x, y);
-      if (DEBUG) {
-            Serial.println("Move mouse " + (String)x + " " + (String)y);
-      }
-    }
-    else if (equalsBuffer(0, space, "SCROLL")) Mouse.move(0, 0, getInt(buf, space));
-    else if (equalsBuffer(0, space, "RANDOMMIN")) rMin = getInt(buf, space);
-    else if (equalsBuffer(0, space, "RANDOMMAX")) rMax = getInt(buf, space);
-    else if (equalsBuffer(0, space, "REM") || equalsBuffer(0, space, "REPEAT")) {}
+    
     else {
       runCommand(0, space);
       while (space >= 0 && space < bufSize) {
@@ -191,17 +181,6 @@ void runCommand(int s, int e) {
   else if (equalsBuffer(s, e, "NUM_PERIOD")) KeyboardWrite(KEYPAD_PERIOD);
   else if (equalsBuffer(s, e, "NUM_PLUS")) KeyboardWrite(KEYPAD_PLUS);
 
-  else if (equalsBuffer(s, e, "CLICK")  || equalsBuffer(s, e, "CLICK_LEFT") || equalsBuffer(s, e, "MOUSECLICK")) Mouse.click();
-  else if (equalsBuffer(s, e, "CLICK_RIGHT")) Mouse.click(MOUSE_RIGHT);
-  else if (equalsBuffer(s, e, "CLICK_MIDDLE")) Mouse.click(MOUSE_MIDDLE);
-
-  else if (equalsBuffer(s, e, "PRESS") || equalsBuffer(s, e, "PRESS_LEFT")) Mouse.press();
-  else if (equalsBuffer(s, e, "PRESS_LEFT")) Mouse.press(MOUSE_RIGHT);
-  else if (equalsBuffer(s, e, "PRESS_MIDDLE")) Mouse.press(MOUSE_MIDDLE);
-  else if (equalsBuffer(s, e, "RELEASE") || equalsBuffer(s, e, "RELEASE_LEFT")) Mouse.release();
-  else if (equalsBuffer(s, e, "RELEASE_LEFT")) Mouse.release(MOUSE_RIGHT);
-  else if (equalsBuffer(s, e, "RELEASE_MIDDLE")) Mouse.release(MOUSE_MIDDLE);
-
   else if (DEBUG) {
     Serial.println("failed to find command");
   }
@@ -215,87 +194,22 @@ void runCommand(int s, int e) {
 }
 
 String getScriptFilename() {
-  String scriptName = ""; // Name of the file that will be opened
-
-  if (N_DIP >= 1) {
-    if (digitalRead(DIP_1) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  } else {
-    scriptName = SCRIPT_NAME;
-  }
-
-  if (N_DIP >= 2) {
-    if (digitalRead(DIP_2) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 3) {
-    if (digitalRead(DIP_3) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 4) {
-    if (digitalRead(DIP_4) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 5) {
-    if (digitalRead(DIP_5) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 6) {
-    if (digitalRead(DIP_6) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 7) {
-    if (digitalRead(DIP_7) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  if (N_DIP >= 8) {
-    if (digitalRead(DIP_8) == LOW) {
-      scriptName += '1';
-    } else {
-      scriptName += '0';
-    }
-  }
-
-  scriptName += ".txt";
+  String scriptFilename = remoteScriptName();
+  scriptFilename += ".txt";
+  return scriptFilename;
   
-  return scriptName;
 }
 
 void executePayload() {
   digitalWrite(LED, HIGH);
 
   String scriptName = getScriptFilename();
-
   payload = SD.open(scriptName);
+  
+  Serial.println(payload);
   logfile = SD.open(LOG_NAME, FILE_WRITE);
   if (!payload) {
+      
     if (DEBUG) {
       Serial.println("couldn't find script: '" + String(scriptName) + "'");
     }
@@ -309,7 +223,6 @@ void executePayload() {
       logfile.print("\n");
     }
     Keyboard.begin();
-    Mouse.begin();
     while (payload.available()) {
 
       buf[bufSize] = payload.read();
@@ -354,12 +267,39 @@ void executePayload() {
       logfile.print("\n");
       logfile.close();
     }
-    Mouse.end();
     Keyboard.end();
   }
 }
+String remoteScriptName(){
+  String scriptName;
+  switch(REMOTE){
+    
+    case 1:{// RF
+      vw_get_message(RFbuff, &RFbuflen); //receive RF file name
+      String RFSTRBUFF = RFbuff;
+      scriptName = RFSTRBUFF; // Name of the file that will be opened
+      delay(1200);
+    }
+      break;
+    default: // no remote
+      scriptName = "script";  
+      delay(500); 
+    }
+  return(scriptName);
+}
 
 void setup() {
+  
+  switch(REMOTE){
+    case 1:
+      vw_set_rx_pin(8);
+      vw_setup(2000);
+      vw_rx_start();
+      break; 
+    default: 
+      Serial.println("No remote selected");
+  }
+  
   if (DEBUG) {
     Serial.begin(115200);
     delay(1000);
@@ -367,25 +307,8 @@ void setup() {
   }
 
   randomSeed(analogRead(0));
-
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, HIGH);
-
-  pinMode(DIP_1, INPUT_PULLUP);
-  pinMode(DIP_2, INPUT_PULLUP);
-  pinMode(DIP_3, INPUT_PULLUP);
-  pinMode(DIP_4, INPUT_PULLUP);
-  pinMode(DIP_5, INPUT_PULLUP);
-  pinMode(DIP_6, INPUT_PULLUP);
-  pinMode(DIP_7, INPUT_PULLUP);
-  pinMode(DIP_8, INPUT_PULLUP);
-
-  if (BUTTON_EXECUTE != 0) {
-    pinMode(BUTTON_EXECUTE, INPUT_PULLUP);
-  } else {
-    delay(1000);
-    executePayload();
-  }
+  delay(1000);
+  executePayload();
 
   if (!SD.begin(SDCARD_CS)) {
     if (DEBUG) {
@@ -397,16 +320,10 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED, LOW);
-
-  if (isSD && BUTTON_EXECUTE != 0) {
-    int buttonState = digitalRead(BUTTON_EXECUTE);
-    if (buttonState == LOW) {
+  
+  if (isSD) {
       executePayload();
-    }
   }
-  // delay in between reads for stability
-  delay(50);
+  
+  delay(50);// delay in between reads for stability
 }
-
-
