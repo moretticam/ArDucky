@@ -4,8 +4,6 @@ bool InsertName = false;
 void setup() {
   // put your setup code here, to run once:
 Serial.begin(9600);
-pinMode(LED_BUILTIN, OUTPUT); 
-pinMode(2, INPUT);
 vw_set_tx_pin(8);
 vw_setup(2000);
 
@@ -28,7 +26,7 @@ void loop() {
       Payload.toCharArray(filename, sizeof(filename));
       Serial.println(filename); 
       send(filename);
-      for(int i = 1; i < 100; i++){
+      for(int i = 1; i < 80; i++){
         send(filename);
         delay(50); 
         }

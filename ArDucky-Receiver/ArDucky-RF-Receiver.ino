@@ -1,7 +1,7 @@
 /*
  * =========================================================
- *   Copyright (c) 2018 toolsprods, (Licensed under MIT)
- *  For more information see: github.com/toolsprods/arducky
+ *   Copyright (c) 2019 moretticam, (Licensed under MIT)
+ *  For more information see: github.com/moretticam/arducky-remote
  * =========================================================
  * 
  */
@@ -13,9 +13,7 @@
 // #include "ConfigurationProMicro.h" // Select this if you have a Sparkfun ProMicro board
 #include "Keyboard.h"
 
-uint8_t RFbuff[VW_MAX_MESSAGE_LEN];   //VirtualWire receiver buffer
-uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;//VirtualWire receiver length
-  
+
 const int KEYPAD_0 = 234;
 const int KEYPAD_1 = 225;
 const int KEYPAD_2 = 226;
@@ -36,8 +34,6 @@ const int PRINTSCREEN = 206;
 
 const int buffersize = 256;
 
-File payload;
-File logfile;
 char* buf = malloc(sizeof(char) * buffersize);
 char* repeatBuffer = malloc(sizeof(char) * 12);
 
@@ -200,23 +196,52 @@ String getScriptFilename() {
   
 }
 
-void executePayload() {
-  digitalWrite(LED, HIGH);
+String remoteScriptName(){
+  String scriptName;
+  switch(REMOTE){
+    
+    case 1:{// RF
+      bool RFState = false;
+      while(RFState == false){
+      uint8_t RFbuff[VW_MAX_MESSAGE_LEN]={""};   //clean VirtualWire receiver buffer
+      uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
+      delay(400);
+      RFState = vw_get_message(RFbuff, &RFbuflen);
+      String RFSTRBUFF = RFbuff;
+      scriptName = RFSTRBUFF; 
+      delay(1200);
+      }
+    }
+      break;
+    default: // no remote
+      scriptName = "script";  
+      delay(500); 
+    }
+  return(scriptName);
+}
 
-  String scriptName = getScriptFilename();
-  payload = SD.open(scriptName);
+
+void executePayload() {
+  File payload;
+  File logfile;
   
+  digitalWrite(LED, HIGH); 
+  payload = SD.open(getScriptFilename());
+  delay(50);
   Serial.println(payload);
   logfile = SD.open(LOG_NAME, FILE_WRITE);
+  
   if (!payload) {
       
     if (DEBUG) {
-      Serial.println("couldn't find script: '" + String(scriptName) + "'");
+      Serial.println("couldn't find script: '" + String(getScriptFilename()) + "'");
     }
     if (LOG) {
       logfile.print("couldn't find script");
       logfile.print("\n");
     }
+
+    
   } else {
     if (LOG) {
       logfile.print("Opened file!");
@@ -269,23 +294,6 @@ void executePayload() {
     }
     Keyboard.end();
   }
-}
-String remoteScriptName(){
-  String scriptName;
-  switch(REMOTE){
-    
-    case 1:{// RF
-      vw_get_message(RFbuff, &RFbuflen); //receive RF file name
-      String RFSTRBUFF = RFbuff;
-      scriptName = RFSTRBUFF; // Name of the file that will be opened
-      delay(1200);
-    }
-      break;
-    default: // no remote
-      scriptName = "script";  
-      delay(500); 
-    }
-  return(scriptName);
 }
 
 void setup() {

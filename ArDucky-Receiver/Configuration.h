@@ -1,7 +1,7 @@
 /*
    =========================================================
-     Copyright (c) 2018 toolsprods, (Licensed under MIT)
-    For more information see: github.com/toolsprods/arducky
+     Copyright (c) 2019 moretticam, (Licensed under MIT)
+    For more information see: github.com/moretticam/arducky-remote
    =========================================================
 
    Configuration.h
@@ -47,11 +47,12 @@
 #define DEBUG true // Enable debug
 #define LOG true // Enable log file
 
-#define SCRIPT_NAME "script" // Script name when there is no remote
+#define SCRIPT_NAME "script" // Script filename when there is no remote selected. Don't put the extension (.txt)
 #define LOG_NAME "arducky.log" // Log filename
 
 #define SDCARD_CS SS // Chip-Select of the SD-Card reader
 #define LED LED_BUILTIN // Led pin
 
 #define REMOTE 1 // Available remotes: 0 (no remote), 1 (RF)
+
 #endif // CONFIGURATION_H

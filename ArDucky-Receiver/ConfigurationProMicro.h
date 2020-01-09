@@ -1,7 +1,7 @@
 /*
  * =========================================================
- *   Copyright (c) 2018 toolsprods, (Licensed under MIT)
- *  For more information see: github.com/toolsprods/arducky
+ *   Copyright (c) 2019 moretticam, (Licensed under MIT)
+ *  For more information see: github.com/moretticam/arducky-remote
  * =========================================================
  *
  * Configuration.h
@@ -42,22 +42,13 @@
 #define DEBUG true // Enable debug
 #define LOG true // Enable log file
 
-#define SCRIPT_NAME "script" // Script filename if not dip-switch available. DON'T put the extension (.txt)
+#define SCRIPT_NAME "script" // Script filename if not dip-switch available. Don't put the extension (.txt)
 #define LOG_NAME "arducky.log" // Log filename
 
-const int BUTTON_EXECUTE = A0; // Button pin, put 0 for no button
-#define SDCARD_CS 10 // Chip-Select of the SD-Card reader
-const int LED = A1; // Led pin
 
-// Dip-Switch pins
-#define N_DIP 8 // Number of switches, put 0 for not dip-switch
-#define DIP_1 2
-#define DIP_2 3
-#define DIP_3 4
-#define DIP_4 5
-#define DIP_5 6
-#define DIP_6 7
-#define DIP_7 8
-#define DIP_8 9
+#define SDCARD_CS 10 // Chip-Select of the SD-Card reader
+#define LED LED_BUILTIN // Led pin
+
+#define REMOTE 1 // Available remotes: 0 (no remote), 1 (RF)
 
 #endif // CONFIGURATION_H
