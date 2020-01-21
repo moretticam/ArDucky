@@ -190,36 +190,93 @@ void runCommand(int s, int e) {
 }
 
 String getScriptFilename() {
-  String scriptFilename = remoteScriptName();
-  scriptFilename += ".txt";
-  return scriptFilename;
-  
-}
-
-String remoteScriptName(){
-  String scriptName;
-  switch(REMOTE){
+  String scriptName = "";
+   switch(REMOTE){
     
     case 1:{// RF
       bool RFState = false;
       while(RFState == false){
-      uint8_t RFbuff[VW_MAX_MESSAGE_LEN]={""};   //clean VirtualWire receiver buffer
-      uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
-      delay(400);
-      RFState = vw_get_message(RFbuff, &RFbuflen);
-      String RFSTRBUFF = RFbuff;
-      scriptName = RFSTRBUFF; 
-      delay(1200);
+        uint8_t RFbuff[VW_MAX_MESSAGE_LEN]={""};   //clean VirtualWire receiver buffer
+        uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
+        delay(400);
+        RFState = vw_get_message(RFbuff, &RFbuflen);
+        String RFSTRBUFF = RFbuff;
+        scriptName = RFSTRBUFF; 
+        delay(1200);
       }
     }
-      break;
+    break;
+    
     default: // no remote
-      scriptName = "script";  
-      delay(500); 
-    }
-  return(scriptName);
-}
+      if (N_DIP >= 1) {
+        if (digitalRead(DIP_1) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      } else {
+        scriptName = SCRIPT_NAME;
+      }
+        
+      if (N_DIP >= 2) {
+        if (digitalRead(DIP_2) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      } 
 
+      if (N_DIP >= 3) {
+        if (digitalRead(DIP_3) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+      
+      if (N_DIP >= 4) {
+        if (digitalRead(DIP_4) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+
+      if (N_DIP >= 5) {
+        if (digitalRead(DIP_5) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+
+      if (N_DIP >= 6) {
+        if (digitalRead(DIP_6) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+
+      if (N_DIP >= 7) {
+        if (digitalRead(DIP_7) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+
+      if (N_DIP >= 8) {
+        if (digitalRead(DIP_8) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
+      }
+    }
+  scriptName += ".txt";
+  return scriptName;
+}
 
 void executePayload() {
   File payload;
@@ -307,6 +364,20 @@ void setup() {
       break; 
     default: 
       Serial.println("No remote selected");
+      pinMode(DIP_1, INPUT_PULLUP);
+      pinMode(DIP_2, INPUT_PULLUP);
+      pinMode(DIP_3, INPUT_PULLUP);
+      pinMode(DIP_4, INPUT_PULLUP);
+      pinMode(DIP_5, INPUT_PULLUP);
+      pinMode(DIP_6, INPUT_PULLUP);
+      pinMode(DIP_7, INPUT_PULLUP);
+      pinMode(DIP_8, INPUT_PULLUP);
+      if (BUTTON_EXECUTE != 0) {
+        pinMode(BUTTON_EXECUTE, INPUT_PULLUP);
+      } else {
+        delay(1000);
+        executePayload();
+      }
   }
   
   if (DEBUG) {
@@ -316,6 +387,9 @@ void setup() {
   }
 
   randomSeed(analogRead(0));
+
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, HIGH);
   delay(1000);
   executePayload();
 
@@ -329,10 +403,22 @@ void setup() {
 }
 
 void loop() {
-  
-  if (isSD) {
+  digitalWrite(LED, LOW);
+
+  switch(REMOTE){
+    case 1:{
+      if (isSD) {
       executePayload();
+      } 
+    }
+      break; 
+    default: 
+      if (isSD && BUTTON_EXECUTE != 0) {
+        int buttonState = digitalRead(BUTTON_EXECUTE);
+        if (buttonState == LOW) {
+          executePayload();
+        }
+      }
   }
-  
   delay(50);// delay in between reads for stability
 }
