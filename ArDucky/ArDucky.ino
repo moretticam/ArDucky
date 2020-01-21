@@ -1,7 +1,7 @@
 /*
  * =========================================================
  *   Copyright (c) 2019 moretticam, (Licensed under MIT)
- *  For more information see: github.com/moretticam/arducky-remote
+ *  For more information see: github.com/moretticam/arducky
  * =========================================================
  * 
  */
@@ -299,10 +299,11 @@ void executePayload() {
 void setup() {
   
   switch(REMOTE){
-    case 1:
+    case 1:{
       vw_set_rx_pin(8);
       vw_setup(2000);
       vw_rx_start();
+    }
       break; 
     default: 
       Serial.println("No remote selected");
