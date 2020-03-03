@@ -1,71 +1,96 @@
 /*
- * =========================================================
- *   Copyright (c) 2019 moretticam, (Licensed under MIT)
- *  For more information see: github.com/moretticam/arducky
- * =========================================================
- * 
- */
+   =========================================================
+     Copyright (c) 2019 moretticam, (Licensed under MIT)
+    For more information see: github.com/moretticam/arducky
+   =========================================================
+
+*/
 
 #include <VirtualWire.h>
 #include "Configuration.h"
 
-String Payload; 
-bool InsertName = false;  
+char scriptName;
+
 
 void setup() {
-  // put your setup code here, to run once:
-Serial.begin(9600);
-switch(REMOTE){
-  case 1:{
-    vw_set_tx_pin(RF_PIN);
-    vw_setup(RF_FREQUENCY);
-    }
-    break;  
-  }
+  vw_set_tx_pin(RF_PIN);
+  vw_setup(RF_FREQUENCY);
 }
 
 void loop() {
-    if(SERIAL_INTERFACE){   
-    if(InsertName == false){
-      delay(500); 
-      Serial.print("Insert the name of the payload: ");
-      while(!Serial.available());
-      Payload = Serial.readString();
-      Serial.println(Payload);  
-      delay(100);
-      Serial.println("Push the send button for a while");
-      InsertName=true;
+  if (digitalRead(2)) {
+    if (N_DIP >= 1) {
+      if (digitalRead(DIP_1) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    } 
+
+    if (N_DIP >= 2) {
+      if (digitalRead(DIP_2) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
       }
     }
-    else{
-      Payload = PAYLOAD_NAME;
-      delay(200); 
+
+    if (N_DIP >= 3) {
+      if (digitalRead(DIP_3) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
       }
-    if(digitalRead(2)){
-      Serial.println("Sending name..."); 
-      char filename[Payload.length()];
-      Payload.toCharArray(filename, sizeof(filename));
-      Serial.println(filename); 
-      send(filename);
-      for(int i = 1; i < 80; i++){
-        send(filename);
-        delay(50); 
-        }
-      delay(1000);
-      Serial.println("done!");
-      if(SERIAL_FLUSH){serialFlush();}
-      InsertName=false;  
-      delay(2000);
     }
+
+    if (N_DIP >= 4) {
+      if (digitalRead(DIP_4) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    }
+
+    if (N_DIP >= 5) {
+      if (digitalRead(DIP_5) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    }
+
+    if (N_DIP >= 6) {
+      if (digitalRead(DIP_6) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    }
+
+    if (N_DIP >= 7) {
+      if (digitalRead(DIP_7) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    }
+
+    if (N_DIP >= 8) {
+      if (digitalRead(DIP_8) == LOW) {
+        scriptName += '1';
+      } else {
+        scriptName += '0';
+      }
+    }
+    send(scriptName);
+    while (digitalRead(2)) {
+      digitalWrite(3, HIGH);
+    }
+    delay(1000);
+  }
 }
 
 void send (char *msg) {
-  vw_send((uint8_t *)msg,strlen(msg));
+  vw_send((uint8_t *)msg, strlen(msg));
   vw_wait_tx();
-  }
-
-void serialFlush(){
-  while(Serial.available() > 0) {
-    char t = Serial.read();
-  }
-}   
+}

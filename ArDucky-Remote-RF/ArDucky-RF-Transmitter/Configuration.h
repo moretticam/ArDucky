@@ -16,18 +16,27 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#define BUTTON_PIN 2 // Send Button Pin
 
 #define DEBUG true // Enable debug
 
-#define REMOTE 1 // Available remotes: 0 (no remote), 1 (RF)
-
-#define SERIAL_INTERFACE true // Interface for the plotter, if false select name of payload
 #define PAYLOAD_NAME "default" // Payload Name if SERIALINTERFACE = false
 
-#define RF_PIN 8 // RF data pin
+#define RF_PIN 4 // RF data pin
 #define RF_FREQUENCY 2000 // RF frequency
 
-#define SERIAL_FLUSH true// Enable Serial Read cleanup
+// Dip-Switch pins
+#define N_DIP 8 // Number of switches
+#define DIP_1 12
+#define DIP_2 11
+#define DIP_3 10
+#define DIP_4 9
+#define DIP_5 8
+#define DIP_6 7
+#define DIP_7 6
+#define DIP_8 5
+
+#define LED_PIN 3
+#define BUTTON_PIN 2 // Send Button Pin
+
 
 #endif // CONFIGURATION_H
