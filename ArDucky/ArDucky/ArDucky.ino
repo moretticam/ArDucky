@@ -1,10 +1,10 @@
 /*
- * =========================================================
- *   Copyright (c) 2019 moretticam, (Licensed under MIT)
- *  For more information see: github.com/moretticam/arducky
- * =========================================================
- * 
- */
+   =========================================================
+     Copyright (c) 2019 moretticam, (Licensed under MIT)
+    For more information see: github.com/moretticam/arducky
+   =========================================================
+
+*/
 #include <VirtualWire.h>
 #include <MFRC522.h>
 #include <SPI.h>
@@ -14,7 +14,7 @@
 // #include "ConfigurationProMicro.h" // Select this if you have a Sparkfun ProMicro board
 #include "Keyboard.h"
 
- MFRC522 mfrc522(RFID_SDA, RFID_RST); //asoidjasopidjasdj ehlo
+MFRC522 mfrc522(RFID_SDA, RFID_RST); //asoidjasopidjasdj ehlo
 
 const int KEYPAD_0 = 234;
 const int KEYPAD_1 = 225;
@@ -103,7 +103,7 @@ void runLine() {
     else if (equalsBuffer(0, space, "STRING")) {
       for (int i = space + 1; i < bufSize; i++) KeyboardWrite(buf[i]);
     }
-    
+
     else {
       runCommand(0, space);
       while (space >= 0 && space < bufSize) {
@@ -193,60 +193,60 @@ void runCommand(int s, int e) {
 
 String getScriptFilename() {
   String scriptName = "";
-   switch(REMOTE){
-    
-    case 1:{// RF
-      bool RFState = false;
-      while(RFState == false){
-        uint8_t RFbuff[VW_MAX_MESSAGE_LEN]={""};   //clean VirtualWire receiver buffer
-        uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
-        delay(400);
-        RFState = vw_get_message(RFbuff, &RFbuflen);
-        String RFSTRBUFF = RFbuff;
-        scriptName = RFSTRBUFF; 
-        delay(1200);
-      }
-    }
-    break;
-    
-    case 2:{// RFID
-      byte Key_Value[MFRC522::MF_KEY_SIZE] ={0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-      MFRC522::MIFARE_Key key;
+  switch (REMOTE) {
 
-      Serial.print("Using key:");
-      for (int i = 0; i < MFRC522::MF_KEY_SIZE; i++) {
-            key.keyByte[i] = Key_Value[i];
-            Serial.print(key.keyByte[i] < 0x10 ? " 0" : " ");
-            Serial.print(key.keyByte[i], HEX);
+    case 1: { // RF
+        bool RFState = false;
+        while (RFState == false) {
+          uint8_t RFbuff[VW_MAX_MESSAGE_LEN] = {""}; //clean VirtualWire receiver buffer
+          uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
+          delay(400);
+          RFState = vw_get_message(RFbuff, &RFbuflen);
+          String RFSTRBUFF = RFbuff;
+          scriptName = RFSTRBUFF;
+          delay(1200);
         }
-      Serial.println(); 
-  
-      byte buffer[18];
-      byte block = 1;
-      MFRC522::StatusCode status;
-      mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(mfrc522.uid));
-      byte byteCount = sizeof(buffer);
-      status = mfrc522.MIFARE_Read(1, buffer, &byteCount);
-      Serial.print(F("Block ")); Serial.print(block); Serial.print(F(":"));
-      for (byte i = 0; i < 16; i++) {
-           Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-           Serial.print(buffer[i], HEX);
       }
-      Serial.println();
-      char RFIDSTRBUFF[4];
-      for(byte a = 0; a < 4; a++){
-        RFIDSTRBUFF[a] = char(buffer[a]);
-        char biit = RFIDSTRBUFF[a];
-        scriptName += biit;
+      break;
+
+    case 2: { // RFID
+        byte Key_Value[MFRC522::MF_KEY_SIZE] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+        MFRC522::MIFARE_Key key;
+
+        Serial.print("Using key:");
+        for (int i = 0; i < MFRC522::MF_KEY_SIZE; i++) {
+          key.keyByte[i] = Key_Value[i];
+          Serial.print(key.keyByte[i] < 0x10 ? " 0" : " ");
+          Serial.print(key.keyByte[i], HEX);
         }
-      
-      mfrc522.PCD_StopCrypto1();
-      mfrc522.PICC_HaltA();
-      
-      
+        Serial.println();
+
+        byte buffer[18];
+        byte block = 1;
+        MFRC522::StatusCode status;
+        mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(mfrc522.uid));
+        byte byteCount = sizeof(buffer);
+        status = mfrc522.MIFARE_Read(1, buffer, &byteCount);
+        Serial.print(F("Block ")); Serial.print(block); Serial.print(F(":"));
+        for (byte i = 0; i < 16; i++) {
+          Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+          Serial.print(buffer[i], HEX);
+        }
+        Serial.println();
+        char RFIDSTRBUFF[4];
+        for (byte a = 0; a < 4; a++) {
+          RFIDSTRBUFF[a] = char(buffer[a]);
+          char biit = RFIDSTRBUFF[a];
+          scriptName += biit;
+        }
+
+        mfrc522.PCD_StopCrypto1();
+        mfrc522.PICC_HaltA();
+
+
       }
-    break; 
-    
+      break;
+
     default: // no remote
       if (N_DIP >= 1) {
         if (digitalRead(DIP_1) == LOW) {
@@ -257,14 +257,14 @@ String getScriptFilename() {
       } else {
         scriptName = SCRIPT_NAME;
       }
-        
+
       if (N_DIP >= 2) {
         if (digitalRead(DIP_2) == LOW) {
           scriptName += '1';
         } else {
           scriptName += '0';
         }
-      } 
+      }
 
       if (N_DIP >= 3) {
         if (digitalRead(DIP_3) == LOW) {
@@ -273,7 +273,7 @@ String getScriptFilename() {
           scriptName += '0';
         }
       }
-      
+
       if (N_DIP >= 4) {
         if (digitalRead(DIP_4) == LOW) {
           scriptName += '1';
@@ -313,7 +313,7 @@ String getScriptFilename() {
           scriptName += '0';
         }
       }
-    }
+  }
   scriptName += ".txt";
   return scriptName;
 }
@@ -326,16 +326,17 @@ String getScriptFilename() {
 void executePayload() {
   File payload;
   File logfile;
-  digitalWrite(LED, HIGH); 
-  String payload_name = "0001.txt";
+  digitalWrite(LED, HIGH);
+  String payload_name = getScriptFilename();
   Serial.println(payload_name);
+  delay(1090);
   payload = SD.open(payload_name);
   delay(50);
   Serial.println(payload);
   logfile = SD.open(LOG_NAME, FILE_WRITE);
-  
+
   if (!payload) {
-      
+
     if (DEBUG) {
       Serial.println("couldn't find script: '" + String(payload_name) + "'");
     }
@@ -344,7 +345,7 @@ void executePayload() {
       logfile.print("\n");
     }
 
-    
+
   } else {
     if (LOG) {
       logfile.print("Opened file!");
@@ -402,26 +403,27 @@ void executePayload() {
 void setup() {
   if (DEBUG) {
     Serial.begin(115200);
-    while(!Serial);
+    while (!Serial);
     delay(1000);
     Serial.println("Enjoy with ArDucky!");
     delay(1000);
   }
-  
-  switch(REMOTE){
-    case 1:{
-      vw_set_rx_pin(RECEIVER_DATA);
-      vw_setup(2000);
-      vw_rx_start();
-    }
-      break; 
-    case 2:{
-      Serial.println("RFID");
-      delay(1000);
-      //mfrc522.PCD_Init();
-    }
-    break;
-    default: 
+
+  switch (REMOTE) {
+    case 1: {
+        vw_set_rx_pin(RECEIVER_DATA);
+        vw_setup(2000);
+        vw_rx_start();
+      }
+      break;
+    case 2: {
+        Serial.println("RFID");
+        delay(1000);
+        SPI.begin();
+        mfrc522.PCD_Init();
+      }
+      break;
+    default:
       Serial.println("No remote selected");
       pinMode(DIP_1, INPUT_PULLUP);
       pinMode(DIP_2, INPUT_PULLUP);
@@ -438,8 +440,8 @@ void setup() {
         executePayload();
       }
   }
-  
-  
+
+
 
   randomSeed(analogRead(0));
 
@@ -447,47 +449,37 @@ void setup() {
   digitalWrite(LED, HIGH);
   delay(1000);
   //executePayload();
-  SD.begin(SS);
-  if (!SD.begin(SS)) {
+
+  /*if (!SD.begin(SS)) {
     if (DEBUG) {
-        Serial.println("couldn't access sd-card :(");
+      Serial.println("couldn't access sd-card :(");
     }
-  } else {
+    } else {
     isSD = true;
-  }
+    } */
 }
 
 void loop() {
   digitalWrite(LED, LOW);
 
-  switch(REMOTE){
-    case 1:{
-      if (isSD) {
-      executePayload();
-      } 
-    }
-      break; 
-    case 2:{
-      /* if ( ! mfrc522.PICC_IsNewCardPresent())
-        return;
+  switch (REMOTE) {
+    case 1: {
+        if (isSD) {
+          executePayload();
+        }
+      }
+      break;
+    case 2: {
 
-    // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial())
-        return;
-      
-        executePayload(); 
-      
-       if ( ! mfrc522.PICC_IsNewCardPresent())
-        return;
+        
 
-    // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial())
-        return; */
-        executePayload(); 
-      
-    }
-      break; 
-    default: 
+        executePayload();
+
+       
+
+      }
+      break;
+    default:
       if (isSD && BUTTON_EXECUTE != 0) {
         int buttonState = digitalRead(BUTTON_EXECUTE);
         if (buttonState == LOW) {

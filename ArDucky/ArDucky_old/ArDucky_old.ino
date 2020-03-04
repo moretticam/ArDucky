@@ -448,7 +448,7 @@ void setup() {
   delay(1000);
   //executePayload();
 
-  if (!SD.begin(SDCARD_CS)z) {
+  if (!SD.begin(SDCARD_CS)) {
     if (DEBUG) {
         Serial.println("couldn't access sd-card :(");
     }
