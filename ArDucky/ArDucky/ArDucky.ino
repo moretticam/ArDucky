@@ -242,6 +242,7 @@ String getScriptFilename() {
 
         mfrc522.PCD_StopCrypto1();
         mfrc522.PICC_HaltA();
+        SPI.end();
 
 
       }
@@ -328,6 +329,11 @@ void executePayload() {
   File logfile;
   digitalWrite(LED, HIGH);
   String payload_name = getScriptFilename();
+  if (!SD.begin(SDCARD_CS)) {
+    if (DEBUG) {
+      Serial.println("couldn't access sd-card :(");
+    }
+  }
   Serial.println(payload_name);
   delay(1090);
   payload = SD.open(payload_name);
@@ -398,6 +404,7 @@ void executePayload() {
     }
     Keyboard.end();
   }
+  SD.end();
 }
 
 void setup() {
@@ -421,6 +428,9 @@ void setup() {
         delay(1000);
         SPI.begin();
         mfrc522.PCD_Init();
+        if(!mfrc522.PCD_Init()){
+          Serial.println("!mfrc522.PCD_Init()")
+          }
       }
       break;
     default:
@@ -470,12 +480,12 @@ void loop() {
       }
       break;
     case 2: {
-
         
+
 
         executePayload();
 
-       
+        
 
       }
       break;
