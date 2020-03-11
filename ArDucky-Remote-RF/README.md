@@ -23,7 +23,9 @@ Receiver:
 Made with [Fritzing](https://github.com/fritzing/fritzing-app).
 
 Transmitter: 
+
 ![ArDucky](https://raw.githubusercontent.com/moretticam/arducky//development/ArDucky-Remote-RF/RF-transmitter.png)
+
 Made with [Fritzing](https://github.com/fritzing/fritzing-app).
 
 If you have to connect it to a Leonardo connects the microSD module to the SPI pins that are in the ICSP connector on the board. The microSD module usually works at 3.3V.
