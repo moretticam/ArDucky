@@ -6,26 +6,20 @@
 
    Configuration.h
 
-   sample - with this you can create your own layout
+   You can use the RF-Transmitter with a Dip-Switch and supports a maxiumum of 8 slots.
+   You can also disable this feature by setting N_DIP to 0 (you will also need to set PAYLOAD_NAME to an script name)
 
-   Avaliable remotes: 
-   0 - Default, none
-   1 - RF
    
 */
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-
-#define DEBUG true // Enable debug
-
-#define PAYLOAD_NAME "default" // Payload Name if SERIALINTERFACE = false
-
+#define PAYLOAD_NAME "default" // Payload Name if Dip-Switch enabled
 #define RF_PIN 4 // RF data pin
 #define RF_FREQUENCY 2000 // RF frequency
 
 // Dip-Switch pins
-#define N_DIP 8 // Number of switches
+#define N_DIP 8 // Number of switches, 0 for non Dip-Switch
 #define DIP_1 12
 #define DIP_2 11
 #define DIP_3 10

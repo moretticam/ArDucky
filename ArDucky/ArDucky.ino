@@ -1,10 +1,10 @@
 /*
- * =========================================================
- *   Copyright (c) 2019 moretticam, (Licensed under MIT)
- *  For more information see: github.com/moretticam/arducky
- * =========================================================
- * 
- */
+   =========================================================
+     Copyright (c) 2019 moretticam, (Licensed under MIT)
+    For more information see: github.com/moretticam/arducky
+   =========================================================
+
+*/
 #include <VirtualWire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -101,7 +101,7 @@ void runLine() {
     else if (equalsBuffer(0, space, "STRING")) {
       for (int i = space + 1; i < bufSize; i++) KeyboardWrite(buf[i]);
     }
-    
+
     else {
       runCommand(0, space);
       while (space >= 0 && space < bufSize) {
@@ -191,22 +191,22 @@ void runCommand(int s, int e) {
 
 String getScriptFilename() {
   String scriptName = "";
-   switch(REMOTE){
-    
-    case 1:{// RF
-      bool RFState = false;
-      while(RFState == false){
-        uint8_t RFbuff[VW_MAX_MESSAGE_LEN]={""};   //clean VirtualWire receiver buffer
-        uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
-        delay(400);
-        RFState = vw_get_message(RFbuff, &RFbuflen);
-        String RFSTRBUFF = RFbuff;
-        scriptName = RFSTRBUFF; 
-        delay(1200);
+  switch (REMOTE) {
+
+    case 1: { // RF
+        bool RFState = false;
+        while (RFState == false) {
+          uint8_t RFbuff[VW_MAX_MESSAGE_LEN] = {""}; //clean VirtualWire receiver buffer
+          uint8_t RFbuflen = VW_MAX_MESSAGE_LEN;
+          delay(400);
+          RFState = vw_get_message(RFbuff, &RFbuflen);
+          String RFSTRBUFF = RFbuff;
+          scriptName = RFSTRBUFF;
+          delay(1200);
+        }
       }
-    }
-    break;
-    
+      break;
+
     default: // no remote
       if (N_DIP >= 1) {
         if (digitalRead(DIP_1) == LOW) {
@@ -217,14 +217,14 @@ String getScriptFilename() {
       } else {
         scriptName = SCRIPT_NAME;
       }
-        
+
       if (N_DIP >= 2) {
         if (digitalRead(DIP_2) == LOW) {
           scriptName += '1';
         } else {
           scriptName += '0';
         }
-      } 
+      }
 
       if (N_DIP >= 3) {
         if (digitalRead(DIP_3) == LOW) {
@@ -233,7 +233,7 @@ String getScriptFilename() {
           scriptName += '0';
         }
       }
-      
+
       if (N_DIP >= 4) {
         if (digitalRead(DIP_4) == LOW) {
           scriptName += '1';
@@ -273,7 +273,7 @@ String getScriptFilename() {
           scriptName += '0';
         }
       }
-    }
+  }
   scriptName += ".txt";
   return scriptName;
 }
@@ -281,15 +281,14 @@ String getScriptFilename() {
 void executePayload() {
   File payload;
   File logfile;
-  
-  digitalWrite(LED, HIGH); 
+
+  digitalWrite(LED, HIGH);
   payload = SD.open(getScriptFilename());
   delay(50);
-  Serial.println(payload);
   logfile = SD.open(LOG_NAME, FILE_WRITE);
-  
+
   if (!payload) {
-      
+
     if (DEBUG) {
       Serial.println("couldn't find script: '" + String(getScriptFilename()) + "'");
     }
@@ -298,7 +297,7 @@ void executePayload() {
       logfile.print("\n");
     }
 
-    
+
   } else {
     if (LOG) {
       logfile.print("Opened file!");
@@ -354,16 +353,18 @@ void executePayload() {
 }
 
 void setup() {
-  
-  switch(REMOTE){
-    case 1:{
-      vw_set_rx_pin(8);
-      vw_setup(2000);
-      vw_rx_start();
-    }
-      break; 
-    default: 
-      Serial.println("No remote selected");
+
+  switch (REMOTE) {
+    case 1: {
+        vw_set_rx_pin(8);
+        vw_setup(2000);
+        vw_rx_start();
+      }
+      break;
+    default:
+      if (DEBUG) {
+        Serial.println("No remote selected");
+      }
       pinMode(DIP_1, INPUT_PULLUP);
       pinMode(DIP_2, INPUT_PULLUP);
       pinMode(DIP_3, INPUT_PULLUP);
@@ -379,10 +380,9 @@ void setup() {
         executePayload();
       }
   }
-  
+
   if (DEBUG) {
-    Serial.begin(115200);
-    delay(1000);
+    Serial.println(115200);
     Serial.println("Enjoy with ArDucky!");
   }
 
@@ -395,7 +395,7 @@ void setup() {
 
   if (!SD.begin(SDCARD_CS)) {
     if (DEBUG) {
-        Serial.println("couldn't access sd-card :(");
+      Serial.println("couldn't access sd-card :(");
     }
   } else {
     isSD = true;
@@ -405,14 +405,14 @@ void setup() {
 void loop() {
   digitalWrite(LED, LOW);
 
-  switch(REMOTE){
-    case 1:{
-      if (isSD) {
-      executePayload();
-      } 
-    }
-      break; 
-    default: 
+  switch (REMOTE) {
+    case 1: {
+        if (isSD) {
+          executePayload();
+        }
+      }
+      break;
+    default:
       if (isSD && BUTTON_EXECUTE != 0) {
         int buttonState = digitalRead(BUTTON_EXECUTE);
         if (buttonState == LOW) {

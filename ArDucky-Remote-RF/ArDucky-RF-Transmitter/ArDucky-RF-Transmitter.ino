@@ -9,8 +9,7 @@
 #include <VirtualWire.h>
 #include "Configuration.h"
 
-char scriptName;
-
+String scriptName;
 
 void setup() {
   vw_set_tx_pin(RF_PIN);
@@ -18,75 +17,81 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(2)) {
-    if (N_DIP >= 1) {
-      if (digitalRead(DIP_1) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+  scriptName = "";
+  if (!N_DIP == 0) {
+    if (digitalRead(2) == HIGH) {
+      if (N_DIP >= 1) {
+        if (digitalRead(DIP_1) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    } 
-
-    if (N_DIP >= 2) {
-      if (digitalRead(DIP_2) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 2) {
+        if (digitalRead(DIP_2) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 3) {
-      if (digitalRead(DIP_3) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 3) {
+        if (digitalRead(DIP_3) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 4) {
-      if (digitalRead(DIP_4) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 4) {
+        if (digitalRead(DIP_4) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 5) {
-      if (digitalRead(DIP_5) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 5) {
+        if (digitalRead(DIP_5) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 6) {
-      if (digitalRead(DIP_6) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 6) {
+        if (digitalRead(DIP_6) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 7) {
-      if (digitalRead(DIP_7) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 7) {
+        if (digitalRead(DIP_7) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-
-    if (N_DIP >= 8) {
-      if (digitalRead(DIP_8) == LOW) {
-        scriptName += '1';
-      } else {
-        scriptName += '0';
+      if (N_DIP >= 8) {
+        if (digitalRead(DIP_8) == LOW) {
+          scriptName += '1';
+        } else {
+          scriptName += '0';
+        }
       }
-    }
-    send(scriptName);
-    while (digitalRead(2)) {
+      char Payload[scriptName.length()];
+      scriptName.toCharArray(Payload, 9);
       digitalWrite(3, HIGH);
+      while (digitalRead(2) == HIGH) {
+        send(Payload);
+        delay(50);
+      }
+      digitalWrite(3, LOW);
     }
-    delay(1000);
+  }
+  else {
+    char Payload[scriptName.length()];
+    scriptName.toCharArray(Payload, 9);
+    scriptName = PAYLOAD_NAME;
+    send(Payload);
+
   }
 }
 
