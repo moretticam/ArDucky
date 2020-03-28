@@ -1,0 +1,71 @@
+/*
+ * =========================================================
+ *   Copyright (c) 2019 moretticam, (Licensed under MIT)
+ *  For more information see: github.com/moretticam/arducky
+ * =========================================================
+ *
+ * Configuration.h
+ *
+ * Define pins, name files and keyboard layout
+ *
+ * Pins for ProMicro:
+ * pin A0 for button
+ * pin 10 for microSD adapter
+ * pin 2 to 9 for dip switch
+ * pin A1 for led diode
+ *
+ * Available layouts:
+ * en_US
+ * en_UK
+ * de_DE
+ * fr_FR
+ * be_BE
+ * es_ES
+ * fi_FI
+ * cs_CZ_QWERTZ
+ * cs_CZ_QWERTY
+ * da_DK
+ * pt_BR
+ * pt_PT
+ * tr_TR
+ * it_IT
+ * sv_SE
+ * sample - with this you can create your own layout
+ * 
+ * Avaliable remotes: 
+ * 0 - Default, none (SELECT FOR DIP USE)
+ * 1 - RF
+ * 
+ */
+
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
+
+#define en_US // Define layout
+
+#define DEBUG true // Enable debug
+#define LOG true // Enable log file
+
+#define SCRIPT_NAME "script" // Script filename when there is no remote selected. DON'T put the extension (.txt)
+#define LOG_NAME "arducky.log" // Log filename
+
+
+#define SDCARD_CS 10 // Chip-Select of the SD-Card reader
+const int LED = A1// Led pin
+
+#define REMOTE 1 // Available remotes: 0 (no remote), 1 (RF)
+
+// When no remote selected (0):
+const int BUTTON_EXECUTE A0 // Button pin, put 0 for not dip-switch
+// Dip-Switch pins
+#define N_DIP 8 // Number of switches, put 0 for not dip-switch
+#define DIP_1 12
+#define DIP_2 11
+#define DIP_3 10
+#define DIP_4 9
+#define DIP_5 8
+#define DIP_6 7
+#define DIP_7 6
+#define DIP_8 5
+
+#endif // CONFIGURATION_H

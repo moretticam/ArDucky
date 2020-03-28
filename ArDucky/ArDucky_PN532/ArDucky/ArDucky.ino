@@ -1,3 +1,4 @@
+
 /*
    =========================================================
      Copyright (c) 2019 moretticam, (Licensed under MIT)
@@ -6,14 +7,15 @@
 
 */
 #include <VirtualWire.h>
-#include <MFRC522.h>
 #include <SPI.h>
+#include <PN532.h>
 #include <SD.h>
-
+uint32_t id;
+uint8_t block[16];
 #include "Configuration.h"
 // #include "ConfigurationProMicro.h" // Select this if you have a Sparkfun ProMicro board
 #include "Keyboard.h"
-
+int id_state = 0;
 const int KEYPAD_0 = 234;
 const int KEYPAD_1 = 225;
 const int KEYPAD_2 = 226;
@@ -208,46 +210,52 @@ String getScriptFilename() {
       break;
 
     case 2: { // RFID
-        MFRC522 mfrc522(RFID_SDA, RFID_RST);
-        SPI.end();
-        SPI.begin();
-        while(!SPI.begin);
-        mfrc522.PCD_Init();
-        byte Key_Value[MFRC522::MF_KEY_SIZE] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-        MFRC522::MIFARE_Key key;
+        digitalWrite(SS, HIGH);
+        digitalWrite(12, LOW);
+        PN532 nfc(12, 9, 7, 8);
+        nfc.begin();
+        uint32_t versiondata = nfc.getFirmwareVersion();
+        if (! versiondata) {
+          Serial.print("Didn't find PN53x board");
+          while (1); // halt
+        }
+        else {
+          Serial.println("yay");
+        }
+        nfc.SAMConfig();
+        
+        bool authenticated = false;               // Flag to indicate if the sector is authenticated
+        uint8_t keys[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+        
+        
+        
+        if(!id){
+          id = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A);
+        Serial.println(id);
+        while(!nfc.authenticateBlock(1, id, 0x04, KEY_A, keys)){
+          id = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A);
+          }
+          nfc.readMemoryBlock(1, 0x04, block);
+        }
+        else{
+          id = 0;
+          }
+        
+        
+        
+               
 
-        Serial.print("Using key:");
-        for (int i = 0; i < MFRC522::MF_KEY_SIZE; i++) {
-          key.keyByte[i] = Key_Value[i];
-          Serial.print(key.keyByte[i] < 0x10 ? " 0" : " ");
-          Serial.print(key.keyByte[i], HEX);
+        for (uint8_t i = 0; i < 16; i++)
+        {
+          //print memory block
+          Serial.print(block[i]);
+          Serial.print(" ");
         }
         Serial.println();
-
-        byte buffer[18];
-        byte block = 1;
-        MFRC522::StatusCode status;
-        mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(mfrc522.uid));
-        byte byteCount = sizeof(buffer);
-        status = mfrc522.MIFARE_Read(1, buffer, &byteCount);
-        Serial.print(F("Block ")); Serial.print(block); Serial.print(F(":"));
-        for (byte i = 0; i < 16; i++) {
-          Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-          Serial.print(buffer[i], HEX);
-        }
-        Serial.println();
-        char RFIDSTRBUFF[4];
-        for (byte a = 0; a < 4; a++) {
-          RFIDSTRBUFF[a] = char(buffer[a]);
-          char biit = RFIDSTRBUFF[a];
-          scriptName += biit;
-        }
-
-        mfrc522.PCD_StopCrypto1();
-        mfrc522.PICC_HaltA();
-        SPI.end();
-
-
+        String RFIDSTR = block;
+        scriptName = RFIDSTR;
+        digitalWrite(12, HIGH);
+        digitalWrite(SS, HIGH);
       }
       break;
 
@@ -323,16 +331,23 @@ String getScriptFilename() {
 }
 
 void executePayload() {
+  
   File payload;
   File logfile;
   digitalWrite(LED, HIGH);
+  
   String payload_name = getScriptFilename();
-  while (!SPI.end) {}
-  SD.begin(SDCARD_CS);
-  if (!SD.begin(SDCARD_CS)) {
-    if (DEBUG) {
-      Serial.println("couldn't access sd-card :(");
-    }
+  digitalWrite(12, HIGH);
+  digitalWrite(SS, HIGH);
+  delay(100);
+  digitalWrite(SS, LOW);
+  digitalWrite(12, HIGH);
+  digitalWrite(SS, LOW);
+  delay(1000);
+  Serial.print("Initializing SD card...");
+  if (!SD.begin()) {
+    Serial.println("initialization failed!");
+    return;
   }
   Serial.println(payload_name);
   delay(1090);
@@ -405,8 +420,9 @@ void executePayload() {
     Keyboard.end();
   }
   SD.end();
-  SPI.end(); 
+  SPI.end();
 }
+
 
 void setup() {
   if (DEBUG) {
@@ -426,6 +442,16 @@ void setup() {
       break;
     case 2: {
         Serial.println("RFID");
+        pinMode(12, OUTPUT);
+        pinMode(SS, OUTPUT);
+        digitalWrite(12, HIGH);
+        digitalWrite(SS, HIGH);
+        /*if (!SD.begin(SS)) {
+        Serial.println("couldn't access sd-card :(");
+       }
+       else{
+        Serial.println("pm");
+        }*/
         delay(1000);
 
 
@@ -458,13 +484,7 @@ void setup() {
   delay(1000);
   //executePayload();
 
-  /*if (!SD.begin(SS)) {
-    if (DEBUG) {
-      Serial.println("couldn't access sd-card :(");
-    }
-    } else {
-    isSD = true;
-    } */
+  
 }
 
 void loop() {
