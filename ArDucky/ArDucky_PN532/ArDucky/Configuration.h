@@ -44,7 +44,7 @@
 
 #define es_ES // Define layout
 
-#define DEBUG true // Enable debug
+#define DEBUG false // Enable debug
 #define LOG true // Enable log file
 
 #define SCRIPT_NAME "script" // Script filename when there is no remote/dip-switch selected. DON'T put the extension (.txt)

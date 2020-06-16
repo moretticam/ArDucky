@@ -1,4 +1,3 @@
-
 /*
    =========================================================
      Copyright (c) 2019 moretticam, (Licensed under MIT)
@@ -8,14 +7,13 @@
 */
 #include <VirtualWire.h>
 #include <SPI.h>
-#include <PN532.h>
 #include <SD.h>
-uint32_t id;
-uint8_t block[16];
+
 #include "Configuration.h"
 // #include "ConfigurationProMicro.h" // Select this if you have a Sparkfun ProMicro board
 #include "Keyboard.h"
-int id_state = 0;
+
+
 const int KEYPAD_0 = 234;
 const int KEYPAD_1 = 225;
 const int KEYPAD_2 = 226;
@@ -209,56 +207,6 @@ String getScriptFilename() {
       }
       break;
 
-    case 2: { // RFID
-        digitalWrite(SS, HIGH);
-        digitalWrite(12, LOW);
-        PN532 nfc(12, 9, 7, 8);
-        nfc.begin();
-        uint32_t versiondata = nfc.getFirmwareVersion();
-        if (! versiondata) {
-          Serial.print("Didn't find PN53x board");
-          while (1); // halt
-        }
-        else {
-          Serial.println("yay");
-        }
-        nfc.SAMConfig();
-        
-        bool authenticated = false;               // Flag to indicate if the sector is authenticated
-        uint8_t keys[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-        
-        
-        
-        if(!id){
-          id = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A);
-        Serial.println(id);
-        while(!nfc.authenticateBlock(1, id, 0x04, KEY_A, keys)){
-          id = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A);
-          }
-          nfc.readMemoryBlock(1, 0x04, block);
-        }
-        else{
-          id = 0;
-          }
-        
-        
-        
-               
-
-        for (uint8_t i = 0; i < 16; i++)
-        {
-          //print memory block
-          Serial.print(block[i]);
-          Serial.print(" ");
-        }
-        Serial.println();
-        String RFIDSTR = block;
-        scriptName = RFIDSTR;
-        digitalWrite(12, HIGH);
-        digitalWrite(SS, HIGH);
-      }
-      break;
-
     default: // no remote
       if (N_DIP >= 1) {
         if (digitalRead(DIP_1) == LOW) {
@@ -331,35 +279,18 @@ String getScriptFilename() {
 }
 
 void executePayload() {
-  
   File payload;
   File logfile;
+
   digitalWrite(LED, HIGH);
-  
-  String payload_name = getScriptFilename();
-  digitalWrite(12, HIGH);
-  digitalWrite(SS, HIGH);
-  delay(100);
-  digitalWrite(SS, LOW);
-  digitalWrite(12, HIGH);
-  digitalWrite(SS, LOW);
-  delay(1000);
-  Serial.print("Initializing SD card...");
-  if (!SD.begin()) {
-    Serial.println("initialization failed!");
-    return;
-  }
-  Serial.println(payload_name);
-  delay(1090);
-  payload = SD.open(payload_name);
+  payload = SD.open(getScriptFilename());
   delay(50);
-  Serial.println(payload);
   logfile = SD.open(LOG_NAME, FILE_WRITE);
 
   if (!payload) {
 
     if (DEBUG) {
-      Serial.println("couldn't find script: '" + String(payload_name) + "'");
+      Serial.println("couldn't find script: '" + String(getScriptFilename()) + "'");
     }
     if (LOG) {
       logfile.print("couldn't find script");
@@ -419,46 +350,21 @@ void executePayload() {
     }
     Keyboard.end();
   }
-  SD.end();
-  SPI.end();
 }
 
-
 void setup() {
-  if (DEBUG) {
-    Serial.begin(115200);
-    while (!Serial);
-    delay(1000);
-    Serial.println("Enjoy with ArDucky!");
-    delay(1000);
-  }
 
   switch (REMOTE) {
     case 1: {
-        vw_set_rx_pin(RECEIVER_DATA);
+        vw_set_rx_pin(8);
         vw_setup(2000);
         vw_rx_start();
       }
       break;
-    case 2: {
-        Serial.println("RFID");
-        pinMode(12, OUTPUT);
-        pinMode(SS, OUTPUT);
-        digitalWrite(12, HIGH);
-        digitalWrite(SS, HIGH);
-        /*if (!SD.begin(SS)) {
-        Serial.println("couldn't access sd-card :(");
-       }
-       else{
-        Serial.println("pm");
-        }*/
-        delay(1000);
-
-
-      }
-      break;
     default:
-      Serial.println("No remote selected");
+      if (DEBUG) {
+        Serial.println("No remote selected");
+      }
       pinMode(DIP_1, INPUT_PULLUP);
       pinMode(DIP_2, INPUT_PULLUP);
       pinMode(DIP_3, INPUT_PULLUP);
@@ -475,16 +381,25 @@ void setup() {
       }
   }
 
-
+  if (DEBUG) {
+    Serial.println(115200);
+    Serial.println("Enjoy with ArDucky!");
+  }
 
   randomSeed(analogRead(0));
 
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
   delay(1000);
-  //executePayload();
+  executePayload();
 
-  
+  if (!SD.begin(SDCARD_CS)) {
+    if (DEBUG) {
+      Serial.println("couldn't access sd-card :(");
+    }
+  } else {
+    isSD = true;
+  }
 }
 
 void loop() {
@@ -495,16 +410,6 @@ void loop() {
         if (isSD) {
           executePayload();
         }
-      }
-      break;
-    case 2: {
-
-
-
-        executePayload();
-
-
-
       }
       break;
     default:
