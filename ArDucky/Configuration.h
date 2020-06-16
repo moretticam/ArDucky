@@ -53,7 +53,7 @@
 #define SDCARD_CS SS // Chip-Select of the SD-Card reader
 #define LED LED_BUILTIN // Led pin
 
-#define REMOTE 2 // Available remotes: 0 (no remote), 1 (RF), 2 (RFID)
+#define REMOTE 1 // Available remotes: 0 (no remote), 1 (RF)
 
 // When no remote selected (0):
 #define BUTTON_EXECUTE 3 // Button pin, put 0 for not dip-switch
@@ -68,10 +68,5 @@
 #define DIP_7 6
 #define DIP_8 5
 
-// When RF selected (1):
-#define RECEIVER_DATA 8 // Data pin of the RF-Receiver
-
-// When RFID selected (2):
-#define RFID_SS 10 // SDA of the PN532
 
 #endif // CONFIGURATION_H
